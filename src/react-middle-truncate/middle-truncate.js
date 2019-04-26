@@ -72,7 +72,6 @@ class MiddleTruncate extends Component {
     if(this.initTruncateComplete) {
       return
     }
-    console.log('init')
     this.onResize()
     this.initTruncateComplete = true
   }
@@ -229,7 +228,6 @@ class MiddleTruncate extends Component {
         this.textCache.componentWidth === measurements.component.width.value &&
         this.textCache.textWidth === measurements.text.width
       ) {
-        console.log('cache')
         return this.textCache.truncatedText
       }
     }
@@ -261,7 +259,6 @@ class MiddleTruncate extends Component {
       this.refText.textContent = newText
       const newTextMeasurement = this.getTextMeasurement(this.refText)
       this.refText.textContent = this.props.text
-      console.log('try', k, newTextMeasurement.width.value, measurements.component.width.value, this.refComponent, this.refComponent.offsetWidth)
       if(newTextMeasurement.width.value <= measurements.component.width.value) {
         break
       }
@@ -303,6 +300,8 @@ class MiddleTruncate extends Component {
       display: 'none'
     };
 
+    delete otherProps.onClick
+
     return (
       <div
         ref={this.onComponentRef}
@@ -312,7 +311,7 @@ class MiddleTruncate extends Component {
         <span ref={this.onTextRef} style={hiddenStyle}>{text}</span>
         <span ref={this.onEllipsisRef} style={hiddenStyle}>{ellipsis}</span>
 
-        <span className="truncated-text">{ truncatedText }</span>
+        <span onClick={this.props.onClick} className="truncated-text">{ truncatedText }</span>
       </div>
     );
   }
