@@ -10,3 +10,5 @@ coverage
 .idea/
 *.iml
 .nvmrc
+*.sublime-project
+*.sublime-workspace
