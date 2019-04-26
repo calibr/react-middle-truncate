@@ -60,15 +60,21 @@ class MiddleTruncate extends Component {
     this.calculateMeasurements = this.calculateMeasurements.bind(this);
     this.truncateText = this.truncateText.bind(this);
 
-    // Debounce the parsing of the text so that the component has had time to render its DOM for measurement calculations
-    this.parseTextForTruncation = debounce( this.parseTextForTruncation.bind(this), 0);
-    this.onResize = debounce( this.onResize.bind(this), this.props.onResizeDebounceMs );
-
     this.refComponent = null
     this.refText = null
     this.refEllipsis = null
 
     this.textCache = null
+    this.initTruncateComplete = false
+  }
+
+  init() {
+    if(this.initTruncateComplete) {
+      return
+    }
+    console.log('init')
+    this.onResize()
+    this.initTruncateComplete = true
   }
 
   onComponentRef = node => {
@@ -90,13 +96,19 @@ class MiddleTruncate extends Component {
   }
 
   componentDidMount() {
-    this.parseTextForTruncation(this.props.text);
-    window.addEventListener('resize', this.onResize);
+    if(this.props.autoTruncate !== false) {
+      setTimeout(() => this.parseTextForTruncation(this.props.text), 0)
+    }
+    // truncate again when the window is loaded, doing so we make sure that
+    // the text will be truncated with its font loaded
+    if(document.fonts.ready) {
+      document.fonts.ready.then(() => this.parseTextForTruncation(this.props.text))
+    }
   }
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.text !== this.props.text) {
-      this.parseTextForTruncation(nextProps.text);
+      setTimeout(() => this.parseTextForTruncation(nextProps.text), 0)
     }
 
     if (nextProps.start !== this.props.start) {
@@ -217,6 +229,7 @@ class MiddleTruncate extends Component {
         this.textCache.componentWidth === measurements.component.width.value &&
         this.textCache.textWidth === measurements.text.width
       ) {
+        console.log('cache')
         return this.textCache.truncatedText
       }
     }
@@ -248,6 +261,7 @@ class MiddleTruncate extends Component {
       this.refText.textContent = newText
       const newTextMeasurement = this.getTextMeasurement(this.refText)
       this.refText.textContent = this.props.text
+      console.log('try', k, newTextMeasurement.width.value, measurements.component.width.value, this.refComponent, this.refComponent.offsetWidth)
       if(newTextMeasurement.width.value <= measurements.component.width.value) {
         break
       }
@@ -298,7 +312,7 @@ class MiddleTruncate extends Component {
         <span ref={this.onTextRef} style={hiddenStyle}>{text}</span>
         <span ref={this.onEllipsisRef} style={hiddenStyle}>{ellipsis}</span>
 
-        { truncatedText }
+        <span className="truncated-text">{ truncatedText }</span>
       </div>
     );
   }
