@@ -1,4 +1,4 @@
-import React, { PureComponent } from 'react';
+import { h, Component } from 'preact';
 import { debounce, toFinite } from 'lodash';
 import { findDOMNode } from 'react-dom';
 import PropTypes from 'prop-types';
@@ -17,7 +17,7 @@ import units from 'units-css';
 //
 // You can pass start and end props a number to offset this position, or alternatively
 // a Regular Expression to calculate these positions dynamically against the text itself.
-class MiddleTruncate extends PureComponent {
+class MiddleTruncate extends Component {
   static propTypes = {
     className: PropTypes.string,
     ellipsis: PropTypes.string,
@@ -63,6 +63,24 @@ class MiddleTruncate extends PureComponent {
     // Debounce the parsing of the text so that the component has had time to render its DOM for measurement calculations
     this.parseTextForTruncation = debounce( this.parseTextForTruncation.bind(this), 0);
     this.onResize = debounce( this.onResize.bind(this), this.props.onResizeDebounceMs );
+
+    this.refComponent = null
+    this.refText = null
+    this.refEllipsis = null
+
+    this.textCache = null
+  }
+
+  onComponentRef = node => {
+    this.refComponent = node
+  }
+
+  onTextRef = node => {
+    this.refText = node
+  }
+
+  onEllipsisRef = node => {
+    this.refEllipsis = node
   }
 
   state = {
@@ -168,7 +186,7 @@ class MiddleTruncate extends PureComponent {
   }
 
   getComponentMeasurement = () => {
-    const node = findDOMNode(this.refs.component);
+    const node = this.refComponent
     const { offsetWidth, offsetHeight } = node;
 
     return {
@@ -180,8 +198,8 @@ class MiddleTruncate extends PureComponent {
   calculateMeasurements() {
     return {
       component: this.getComponentMeasurement(),
-      ellipsis: this.getTextMeasurement(this.refs.ellipsis),
-      text: this.getTextMeasurement(this.refs.text)
+      ellipsis: this.getTextMeasurement(this.refEllipsis),
+      text: this.getTextMeasurement(this.refText)
     };
   }
 
@@ -193,16 +211,56 @@ class MiddleTruncate extends PureComponent {
       return ellipsis;
     }
 
-    const delta = Math.ceil(measurements.text.width.value - measurements.component.width.value);
-    const totalLettersToRemove = Math.ceil( ((delta / measurements.ellipsis.width.value ) ) );
-    const middleIndex = Math.round(text.length / 2);
+    if(this.textCache) {
+      if(
+        this.textCache.text === text &&
+        this.textCache.componentWidth === measurements.component.width.value &&
+        this.textCache.textWidth === measurements.text.width
+      ) {
+        return this.textCache.truncatedText
+      }
+    }
 
-    const preserveLeftSide = text.slice(0, start);
-    const leftSide = text.slice(start, middleIndex - totalLettersToRemove);
-    const rightSide = text.slice(middleIndex + totalLettersToRemove, text.length - end);
-    const preserveRightSide = text.slice(text.length - end, text.length);
+    let newText
+    for(let k = 1; k > 0.5; k -= 0.05) {
+      const charWidth = measurements.text.width.value/text.length * k
 
-    return `${preserveLeftSide}${leftSide}${ellipsis}${rightSide}${preserveRightSide}`;
+      const delta = measurements.text.width.value - measurements.component.width.value
+      if(delta <= 0) {
+        newText = text
+        break
+      }
+      const totalLettersToRemove = Math.ceil( ((delta / charWidth ) ) / 2 );
+      const middleIndex = Math.round(text.length / 2);
+
+      if(totalLettersToRemove >= middleIndex) {
+        newText = '...'
+        break
+      }
+
+      const preserveLeftSide = text.slice(0, start);
+      const leftSide = text.slice(start, middleIndex - totalLettersToRemove);
+      const rightSide = text.slice(middleIndex + totalLettersToRemove, text.length - end);
+      const preserveRightSide = text.slice(text.length - end, text.length);
+
+      newText = `${preserveLeftSide}${leftSide}${ellipsis}${rightSide}${preserveRightSide}`;
+
+      this.refText.textContent = newText
+      const newTextMeasurement = this.getTextMeasurement(this.refText)
+      this.refText.textContent = this.props.text
+      if(newTextMeasurement.width.value <= measurements.component.width.value) {
+        break
+      }
+    }
+
+    this.textCache = {
+      text,
+      truncatedText: newText,
+      componentWidth: measurements.component.width.value,
+      textWidth: measurements.text.width.value
+    }
+
+    return newText
   }
 
   parseTextForTruncation(text) {
@@ -233,12 +291,12 @@ class MiddleTruncate extends PureComponent {
 
     return (
       <div
-        ref="component"
+        ref={this.onComponentRef}
         style={componentStyle}
         onCopy={this.onCopy}
         {...otherProps}>
-        <span ref="text" style={hiddenStyle}>{text}</span>
-        <span ref="ellipsis" style={hiddenStyle}>{ellipsis}</span>
+        <span ref={this.onTextRef} style={hiddenStyle}>{text}</span>
+        <span ref={this.onEllipsisRef} style={hiddenStyle}>{ellipsis}</span>
 
         { truncatedText }
       </div>
