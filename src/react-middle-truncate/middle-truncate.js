@@ -201,8 +201,8 @@ class MiddleTruncate extends Component {
     const { offsetWidth, offsetHeight } = node;
 
     return {
-      width: units.parse(offsetWidth, 'px'),
-      height: units.parse(offsetHeight, 'px')
+      width: {value: offsetWidth, unit: 'px'},
+      height: {value: offsetHeight, unit: 'px'}
     };
   }
 
