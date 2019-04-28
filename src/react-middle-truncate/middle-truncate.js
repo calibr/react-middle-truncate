@@ -176,7 +176,7 @@ class MiddleTruncate extends Component {
     const node = findDOMNode(ref);
     const text = node.textContent;
 
-    const metrics = initTextMetrics.init(node);
+    const metrics = initTextMetrics(node);
 
     const width = metrics.width(text);
 
