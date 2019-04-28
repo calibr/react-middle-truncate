@@ -127,7 +127,8 @@
     "classnames": "^2.2.6",
     "lodash": "^4.17.10",
     "measure-text": "0.0.4",
-    "normalize.css": "^8.0.0"
+    "normalize.css": "^8.0.0",
+    "text-metrics": "^1.0.0"
   },
   "peerDependencies": {
     "react": ">=15.5.4",

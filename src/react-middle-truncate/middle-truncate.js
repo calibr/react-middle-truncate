@@ -3,6 +3,7 @@ import { debounce, toFinite } from 'lodash';
 import { findDOMNode } from 'react-dom';
 import PropTypes from 'prop-types';
 import measureText from 'measure-text';
+import textMetrics from 'text-metrics'
 
 // A React component for truncating text in the middle of the string.
 //
@@ -176,23 +177,11 @@ class MiddleTruncate extends Component {
     const node = findDOMNode(ref);
     const text = node.textContent;
 
-    const {
-      fontFamily,
-      fontSize,
-      fontWeight,
-      fontStyle
-    } = window.getComputedStyle(node);
+    const metrics = textMetrics.init(node);
 
-    const { width, height } = measureText({
-      text,
-      fontFamily,
-      fontSize,
-      fontWeight,
-      fontStyle,
-      lineHeight: 1
-    });
+    const width = metrics.width(text);
 
-    return { width, height };
+    return { width };
   }
 
   getComponentMeasurement = () => {
