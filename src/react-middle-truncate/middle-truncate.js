@@ -180,7 +180,7 @@ class MiddleTruncate extends Component {
 
     const width = metrics.width(text);
 
-    return { width };
+    return { width: { value: width, unit: 'px' } };
   }
 
   getComponentMeasurement = () => {
