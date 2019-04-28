@@ -31,9 +31,6 @@
     "test:watch": "cross-env NODE_ENV=test mocha-webpack \"./src/**/*.spec.js\" --watch",
     "test:karma": "cross-env NODE_ENV=test karma start"
   },
-  "precommit": [
-    "check:staged"
-  ],
   "lint-staged": {
     "src/**/*{.js,.jsx}": "mongodb-js-precommit"
   },
@@ -126,7 +123,6 @@
   "dependencies": {
     "classnames": "^2.2.6",
     "lodash": "^4.17.10",
-    "measure-text": "0.0.4",
     "normalize.css": "^8.0.0",
     "text-metrics": "^1.0.0"
   },
