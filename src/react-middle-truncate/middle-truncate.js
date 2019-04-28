@@ -3,7 +3,6 @@ import { debounce, toFinite } from 'lodash';
 import { findDOMNode } from 'react-dom';
 import PropTypes from 'prop-types';
 import measureText from 'measure-text';
-import units from 'units-css';
 
 // A React component for truncating text in the middle of the string.
 //
