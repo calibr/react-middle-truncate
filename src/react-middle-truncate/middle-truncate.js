@@ -1,5 +1,5 @@
 import { h, Component } from 'preact';
-import { debounce, toFinite } from 'lodash';
+import toFinite from 'lodash.tofinite';
 import { findDOMNode } from 'react-dom';
 import PropTypes from 'prop-types';
 import { init as initTextMetrics } from 'text-metrics'
